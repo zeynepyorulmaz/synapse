@@ -1,0 +1,11 @@
+include README.md
+include LICENSE
+include pyproject.toml
+
+recursive-include synapse_protocol/src/synapse_protocol *.py
+recursive-include synapse_protocol/src/synapse_protocol/templates *.html
+
+global-exclude __pycache__
+global-exclude *.py[cod]
+global-exclude *.so
+global-exclude .DS_Store 
