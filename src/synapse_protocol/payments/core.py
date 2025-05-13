@@ -5,9 +5,8 @@ Core implementation of the A2A Payment Protocol
 import uuid
 from datetime import datetime
 from typing import Optional, Dict, Any
-from .models import PaymentRequest, PaymentResponse, PaymentStatus
+from .types import PaymentRequest, PaymentResponse, PaymentStatus
 from .exceptions import PaymentError, ValidationError
-from .xrp_bridge import XrpPaymentBridge
 
 class PaymentProtocol:
     """Main class for handling A2A payment operations."""
@@ -26,7 +25,11 @@ class PaymentProtocol:
         self._validate_environment()
         
         # Initialize XRP bridge if client is provided
-        self.xrp_bridge = XrpPaymentBridge(xrp_client) if xrp_client else None
+        if xrp_client:
+            from .xrp_bridge import XrpPaymentBridge
+            self.xrp_bridge = XrpPaymentBridge(xrp_client)
+        else:
+            self.xrp_bridge = None
         
     def _validate_environment(self) -> None:
         """Validate the environment setting."""
@@ -35,50 +38,46 @@ class PaymentProtocol:
             
     async def initiate_payment(
         self,
-        sender_account: str,
-        receiver_account: str,
-        amount: float,
-        currency: str,
-        description: Optional[str] = None,
-        metadata: Optional[Dict[str, Any]] = None
+        payment_data: Dict[str, Any]
     ) -> PaymentResponse:
         """
         Initiate an A2A payment.
         
         Args:
-            sender_account: Sender's account identifier
-            receiver_account: Receiver's account identifier
-            amount: Payment amount
-            currency: Payment currency (e.g., 'USD', 'EUR', 'XRP')
-            description: Optional payment description
-            metadata: Optional additional payment metadata
+            payment_data: Dictionary containing payment details
+                - sender_account: Sender's account identifier
+                - receiver_account: Receiver's account identifier
+                - amount: Payment amount
+                - currency: Payment currency (e.g., 'USD', 'EUR', 'XRP')
+                - description: Optional payment description
+                - metadata: Optional additional payment metadata
             
         Returns:
             PaymentResponse object containing payment details
         """
         # Validate input parameters
-        if amount <= 0:
+        if payment_data["amount"] <= 0:
             raise ValidationError("Amount must be greater than zero")
             
         # Create payment request
         payment_request = PaymentRequest(
             payment_id=str(uuid.uuid4()),
-            sender_account=sender_account,
-            receiver_account=receiver_account,
-            amount=amount,
-            currency=currency,
-            description=description,
-            metadata=metadata,
+            sender_account=payment_data["sender_account"],
+            receiver_account=payment_data["receiver_account"],
+            amount=payment_data["amount"],
+            currency=payment_data["currency"],
+            description=payment_data.get("description"),
+            metadata=payment_data.get("metadata"),
             status=PaymentStatus.PENDING,
             created_at=datetime.utcnow()
         )
         
         # Process payment based on currency
-        if currency == "XRP" and self.xrp_bridge:
+        if payment_data["currency"] == "XRP" and self.xrp_bridge:
             return await self.xrp_bridge.process_payment(payment_request)
         else:
             # TODO: Implement other payment methods
-            raise PaymentError(f"Unsupported currency: {currency}")
+            raise PaymentError(f"Unsupported currency: {payment_data['currency']}")
         
     async def get_payment_status(self, payment_id: str) -> PaymentStatus:
         """

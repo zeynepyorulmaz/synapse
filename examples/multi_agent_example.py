@@ -11,18 +11,18 @@ async def main():
     # Initialize Flask app
     app = Flask(__name__)
     
-    # Initialize payment protocol
+    # Initialize payment protocol with test API key
     payment_protocol = PaymentProtocol(
-        api_key=os.getenv("SYNAPSE_API_KEY", "your_api_key"),
+        api_key="test_synapse_key_123",  # Test API key
         environment="sandbox"
     )
     
     # Initialize WebSocket manager
     websocket_manager = WebSocketManager(app)
     
-    # Initialize agent manager
+    # Initialize agent manager with test API key
     agent_manager = AgentManager(
-        api_key=os.getenv("OPENAI_API_KEY", "your_openai_api_key"),
+        api_key="test_openai_key_456",  # Test OpenAI API key
         environment="sandbox"
     )
     
@@ -34,8 +34,8 @@ async def main():
     try:
         # Create a payment request
         payment_data = {
-            "sender_account": "sender123",
-            "receiver_account": "receiver456",
+            "sender_account": "test_sender_123",
+            "receiver_account": "test_receiver_456",
             "amount": 1000.0,
             "currency": "XRP",
             "description": "Large payment for services"
@@ -61,7 +61,7 @@ async def main():
             print(f"Payment status: {status.status}")
             
             # Get account balance
-            balance = await payment_protocol.get_balance("sender123")
+            balance = await payment_protocol.get_balance("test_sender_123")
             print(f"Account balance: {balance.amount} {balance.currency}")
         else:
             print("Payment rejected due to high risk level")

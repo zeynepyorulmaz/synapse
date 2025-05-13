@@ -5,8 +5,7 @@ Bridge module to connect XRP implementation with A2A payment protocol
 import json
 from typing import Dict, Any, Optional
 from datetime import datetime
-from .core import PaymentProtocol
-from .models import PaymentRequest, PaymentResponse, PaymentStatus
+from .types import PaymentRequest, PaymentResponse, PaymentStatus
 from .exceptions import PaymentError, ValidationError
 
 class XrpPaymentBridge:

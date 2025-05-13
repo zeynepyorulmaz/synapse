@@ -1,9 +1,9 @@
 """
-A2A (Account-to-Account) Payment Protocol Module
+Payment protocol implementation
 """
 
 from .core import PaymentProtocol
-from .models import PaymentRequest, PaymentResponse, PaymentStatus
+from .types import PaymentRequest, PaymentResponse, PaymentStatus
 from .exceptions import PaymentError, ValidationError
 
 __all__ = [
